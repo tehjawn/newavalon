@@ -542,7 +542,9 @@
     function createRoom(roomId, nickname, uid) {
       var newRoomData = {
         roomId: roomId,
-        host: uid,
+        meta: {
+          host: uid
+        },
         players: {}
       }
 

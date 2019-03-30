@@ -295,10 +295,15 @@
       </p>
       <div class="lobby-form">
         <span class="lobby-form-label">Enter Room Number: </span>
-        <input tabindex="1" class="lobby-form-input" type="text" id="targetRoomInput" placeholder="Room Number">
+        <input tabindex="1" class="lobby-form-input" type="text" id="targetRoomInput" placeholder="Ex: 12345">
         <br>
-        <span class="lobby-form-label">Enter Your Nickname: </span>
-        <input tabindex="2" class="lobby-form-input" type="text" id="targetNicknameInput" placeholder="Nickname">
+        <span class="lobby-form-label">Enter Your Nickname:
+          <br>
+          <small>
+            Be careful - you can only set this once per room!
+          </small>
+        </span>
+        <input tabindex="2" class="lobby-form-input" type="text" id="targetNicknameInput" placeholder="Ex: Boaty McBoatface">
       </div>
       <br>
       <button tabindex="3" class="lobby-start-btn"
@@ -424,7 +429,7 @@
 
     function updatePlayers(players) {
       var playersHtml = ''
-      players.forEach(player => {
+      Object.values(players).forEach(player => {
         playersHtml += `
         <div data-uid="${player.uid}" class="game-table-player-ctn player-${player.uid}">
           <div class="game-table-player">
@@ -439,7 +444,6 @@
     }
 
     function updateMessages(messages) {
-      console.log(messages)
       if (!messages) {
         console.log('LOG: No messages found.')
         document.querySelector('#gameChatFeed').innerHTML =
@@ -448,7 +452,6 @@
       }
       var messagesHtml = ''
       messageList = Object.values(messages)
-      console.log(messageList)
       messageList.forEach(message => {
         messagesHtml += `
         <div class="game-chat-feed-message">${message.user}: ${message.text}</div>
@@ -464,7 +467,7 @@
       }
       var usersHtml = ''
       var userCount = 0
-      users.forEach(user => {
+      Object.values(users).forEach(user => {
         userCount++
         usersHtml += `
         <div class="game-chat-user">${user.isHost ? '(Host) ' : ''}${user.nickname}</div>
@@ -487,26 +490,41 @@
         } else {
           document.querySelector('#gameMetaRoomId').innerHTML = roomId
           roomData = room
-          refreshRoom(roomId)
+
+          // Check If Player Exists
+          if (Object.keys(room.players).includes(userData.uid)) {
+            console.log(`LOG: User already exists in room ${roomId}.`)
+          } else {
+            firebase.database().ref(`rooms/${roomId}/players/${userData.uid}`).set({
+              uid: userData.uid,
+              nickname: nickname
+            })
+          }
+          startRoomUpdateLoop(roomId)
         }
       });
     }
 
     function createRoom(roomId, nickname, uid) {
-      firebase.database().ref('rooms/' + roomId).set({
+      var newRoomData = {
         roomId: roomId,
         host: uid,
-        players: [{
-          uid: uid,
-          nickname: nickname,
-          isHost: true
-        }]
-      }).then(function () {
+        players: {}
+      }
+
+      newRoomData.players[uid] = {
+        uid: uid,
+        nickname: nickname,
+        isHost: true
+      }
+      firebase.database().ref('rooms/' + roomId).set(
+        newRoomData
+      ).then(function () {
         populateRoomData(roomId, nickname)
       })
     }
 
-    function refreshRoom(roomId) {
+    function startRoomUpdateLoop(roomId) {
       if (!roomData) {
         alert(`Error: No room data detected for ID ${roomId}`)
         return
@@ -514,20 +532,17 @@
         var metaRef = firebase.database().ref(`rooms/${roomId}/meta`);
         metaRef.on('value', function (snapshot) {
           var metaData = snapshot.val()
-          console.log(metaData)
         });
 
         var messagesRef = firebase.database().ref(`rooms/${roomId}/messages`);
         messagesRef.on('value', function (snapshot) {
           var messagesData = snapshot.val()
-          console.log(messagesData)
           updateMessages(messagesData)
         });
 
         var playersRef = firebase.database().ref(`rooms/${roomId}/players`);
         playersRef.on('value', function (snapshot) {
           var playersData = snapshot.val()
-          console.log(playersData)
           updatePlayers(playersData)
           updateUsers(playersData)
           if (!playersData) {
@@ -560,6 +575,22 @@
         text: message
       });
       document.getElementById('gameChatFeedInput').value = ''
+    }
+
+    // === Player Inactive Logic === //
+    window.onbeforeunload = setSelfInactive;
+
+    function setSelfInactive() {
+      if (roomData) {
+        if (Object.keys(roomData.players).includes(userData.uid)) {
+          firebase.database().ref(`rooms/${roomId}/players/${userData.uid}`).set({
+            uid: userData.uid,
+            nickname: nickname
+          })
+          console.log(`LOG: Setting self to inactive in room.`)
+        }
+      }
+      return null;
     }
   </script>
 </body>

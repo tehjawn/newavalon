@@ -418,7 +418,7 @@
     var screen = 'lobby'
 
     function joinGame(roomId, nickname) {
-      if (!roomId && !nickname) {
+      if (!roomId || !nickname) {
         alert('Please input a Room Number and a Nickname before continuing!')
         return
       }
@@ -454,7 +454,7 @@
               <div class="game-table-player-portrait character-portrait-servant">
                 ${player.uid == userData.uid ? '<div class="character-icon-self">You</div>' : ''}
               </div>
-              <div class="game-table-player-name">${player.nickname}</div>
+              <div class="game-table-player-name">${player.isHost ? '(Host) ' : ''}${player.nickname}</div>
               <div class="game-table-player-team character-team-good"></div>
             </div>
           </div>
@@ -632,3 +632,13 @@
 </body>
 
 </html>
+
+<!-- 
+  TODO
+  - Colors by UID
+  - Game Start Button
+  - Game Logic
+  - Store Rooms a User exists in
+  - Confirmation dialogs
+  - Custom Detailed Player cards
+-->

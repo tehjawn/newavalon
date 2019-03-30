@@ -173,6 +173,10 @@
       animation: fadeIn .2s forwards;
     }
 
+    .game-table-player-ctn.player-self {
+      filter: drop-shadow(0 0 16px -8px yellow)
+    }
+
     .game-table-player {
       position: relative;
       background: white;
@@ -197,8 +201,20 @@
     }
 
     .game-table-player-portrait.character-portrait-servant {
+      position: relative;
       background: url(http://www.sclance.com/pngs/paladin-png/paladin_png_979843.png), linear-gradient(#b5e9f9, #253946);
       background-size: cover, cover;
+    }
+
+    .character-icon-self {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      background: yellow;
+      border: 2px solid gold;
+      padding: 0px 12px 2px;
+      font-size: .9em;
+      border-radius: 64px;
     }
 
     .game-table-player-name {
@@ -433,14 +449,16 @@
       if (players) {
         Object.values(players).forEach(player => {
           playersHtml += `
-        <div data-uid="${player.uid}" class="game-table-player-ctn player-${player.uid}">
-          <div class="game-table-player">
-            <div class="game-table-player-portrait character-portrait-servant"></div>
-            <div class="game-table-player-name">${player.nickname}</div>
-            <div class="game-table-player-team character-team-good"></div>
+          <div data-uid="${player.uid}" class="game-table-player-ctn player-${player.uid}">
+            <div class="game-table-player">
+              <div class="game-table-player-portrait character-portrait-servant">
+                ${player.uid == userData.uid ? '<div class="character-icon-self">You</div>' : ''}
+              </div>
+              <div class="game-table-player-name">${player.nickname}</div>
+              <div class="game-table-player-team character-team-good"></div>
+            </div>
           </div>
-        </div>
-        `
+          `
         })
       }
       document.querySelector('#playersCtn').innerHTML = playersHtml
@@ -495,8 +513,8 @@
           roomData = room
 
           // Check If Player Exists
-          var hostOverride = false
-          if (!room.meta.host || !room.players) {
+          var hostOverride = null
+          if ((room.meta == null && room.meta.host == null) || !room.players) {
             hostOverride = true
             firebase.database().ref(`rooms/${roomId}/meta`).set({
               host: userData.uid,
@@ -513,7 +531,7 @@
             firebase.database().ref(`rooms/${roomId}/players/${userData.uid}`).set({
               uid: userData.uid,
               nickname: nickname,
-              isHost: hostOverride ? '' : true
+              isHost: hostOverride
             })
           }
           startRoomUpdateLoop(roomId)

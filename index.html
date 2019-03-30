@@ -428,8 +428,11 @@
         return
       }
 
-      if (!roomId.value.match(/^[0-9a-zA-Z]+$/)) {
+      if (!roomId.match(/^[0-9a-zA-Z]+$/)) {
         alert('Please input a valid alphanumeric Room ID before continuing!')
+        var targetRoomInputElement = document.getElementById('targetRoomInput')
+        targetRoomInputElement.value = ''
+        targetRoomInputElement.style.border = '1px solid red';
         return
       }
 

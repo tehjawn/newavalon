@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>New Avalon Online</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* General */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #c5bebe;
+      border-radius: 64px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 64px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    .avalon-app {
+      position: relative;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #24243f;
+    }
+
+    /* Loading */
+    #loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 20, 40, .95);
+      color: #fafafa;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      opacity: 1;
+      transition: 2s;
+    }
+
+    /* Lobby */
+    #lobby {
+      text-align: center;
+      color: #fafafa;
+    }
+
+    .lobby-form {
+      text-align: left;
+      background: #fafafa;
+      color: #111111;
+      padding: 24px 16px;
+      border-radius: 4px;
+      box-shadow: 0 8px 32px -8px rgba(0, 20, 40, 0.5);
+    }
+
+    .lobby-form-label {
+      display: block;
+      padding: 4px 8px;
+      font-weight: 600;
+    }
+
+    .lobby-form-input {
+      display: block;
+      width: 100%;
+      padding: 8px 16px;
+      border-radius: 64px;
+      border: 1px solid gray;
+    }
+
+    button.lobby-start-btn {
+      background: linear-gradient(45deg, orange, yellow);
+      padding: 8px 16px;
+      border-radius: 4px;
+      color: black;
+      font-weight: 600;
+      box-shadow: 0 4px 16px -4px wheat;
+      text-align: center;
+      cursor: pointer;
+      transition: .2s;
+      user-select: none;
+      border: none;
+      width: 100%;
+    }
+
+    .lobby-start-btn:hover {
+      filter: brightness(1.5);
+    }
+
+    .lobby-start-btn:active {
+      box-shadow: none;
+      filter: brightness(2);
+    }
+
+    /* Game */
+
+    #game {
+      /* display: flex; */
+      flex-direction: column;
+      display: none;
+      opacity: 0;
+      animation: fadeIn 2s forwards;
+      background: #fafafa;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .game-meta-ctn {
+      background: #24243f;
+      color: #fefefe;
+      padding: 4px;
+      font-size: .9em;
+      height: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Game Table */
+
+    .game-table-ctn {
+      flex: 1;
+      background: radial-gradient(#ccbb97, #443420);
+      height: calc(70vh - 32px);
+      overflow-y: auto;
+    }
+
+    .game-table-players-ctn {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .game-table-player-ctn {
+      padding: 8px;
+      opacity: 0;
+      animation: fadeIn .2s forwards;
+    }
+
+    .game-table-player {
+      position: relative;
+      background: white;
+      border-radius: 4px;
+      width: 120px;
+      box-shadow: 0 4px 16px -8px black;
+      height: 140px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .game-table-player-portrait {
+      flex: 1;
+      background: url(https://banner2.kisspng.com/20180715/yag/kisspng-question-mark-computer-icons-exclamation-mark-desk-question-mark-emoji-5b4bb794264216.8330599815316888521567.jpg), linear-gradient(#b5e9f9, #253946);
+      width: 100%;
+      height: 100%;
+      border-radius: 4px 4px 0 0;
+      background-size: cover, cover;
+    }
+
+    .game-table-player-portrait.character-portrait-servant {
+      background: url(http://www.sclance.com/pngs/paladin-png/paladin_png_979843.png), linear-gradient(#b5e9f9, #253946);
+      background-size: cover, cover;
+    }
+
+    .game-table-player-name {
+      padding: 8px;
+    }
+
+    .game-table-player-team {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: lime;
+      width: 16px;
+      height: 16px;
+      border: 2px solid green;
+      border-radius: 50%;
+    }
+
+    /* Game Chat */
+
+    .game-chat-ctn {
+      display: flex;
+      height: 30vh;
+    }
+
+    .game-chat-feed-ctn {
+      flex: 2;
+      min-width: 200px;
+      padding: 16px;
+      background: #24243f;
+      color: white;
+      font-size: .9em;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #gameChatFeed {
+      position: relative;
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .game-chat-feed-message {
+      padding: 8px;
+      margin: 8px 0;
+      border-left: 4px solid salmon;
+      background: #333357;
+      border-radius: 64px;
+    }
+
+    .game-chat-feed-input-ctn {
+      padding: 16px 0 4px 0;
+    }
+
+    #gameChatFeedInput {
+      background: #3a3741;
+      border: none;
+      border-radius: 64px;
+      padding: 8px 16px;
+      width: 100%;
+      color: white;
+    }
+
+    #gameChatFeedInput::placeholder {
+      color: #f0f0f0;
+    }
+
+    .game-chat-users-ctn {
+      flex: 1;
+      min-width: 200px;
+      padding: 16px;
+      background: #171733;
+      color: white;
+    }
+
+    .game-chat-user {
+      padding: 4px 8px 6px;
+      margin: 8px 0;
+      border-left: 4px solid salmon;
+      background: #323270;
+      border-radius: 64px;
+      opacity: 0;
+      animation: fadeIn .2s forwards;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="avalon-app">
+    <div id="lobby">
+      <h3>Welcome to Avalon Online!</h3>
+      <p>
+        <small>Player ID: <span id="lobbyPlayerId"></span></small>
+      </p>
+      <div class="lobby-form">
+        <span class="lobby-form-label">Enter Room Number: </span>
+        <input tabindex="1" class="lobby-form-input" type="text" id="targetRoomInput" placeholder="Room Number">
+        <br>
+        <span class="lobby-form-label">Enter Your Nickname: </span>
+        <input tabindex="2" class="lobby-form-input" type="text" id="targetNicknameInput" placeholder="Nickname">
+      </div>
+      <br>
+      <button tabindex="3" class="lobby-start-btn"
+        onclick="joinGame(document.getElementById('targetRoomInput').value, document.getElementById('targetNicknameInput').value)">
+        Start Game
+      </button>
+    </div>
+    <div id="game">
+      <div id="loading">
+        Loading Your Avalon Online Room...
+      </div>
+      <div class="game-meta-ctn">
+        <div class="game-meta">
+          Room: <span id="gameMetaRoomId"></span>
+        </div>
+      </div>
+      <div class="game-table-ctn">
+        <div id="playersCtn" class="game-table-players-ctn">
+          <!-- <div class="game-table-player-ctn">
+            <div class="game-table-player">
+              <div class="game-table-player-portrait character-portrait-servant"></div>
+              <div class="game-table-player-name">1</div>
+              <div class="game-table-player-team character-team-good"></div>
+            </div>
+          </div> -->
+        </div>
+      </div>
+      <div class="game-chat-ctn">
+        <div class="game-chat-feed-ctn">
+          <small>Message Feed</small>
+          <div id="gameChatFeed">
+            <div style="padding: 12px; opacity: .8;">It's empty here... type something in!</div>
+          </div>
+          <div class="game-chat-feed-input-ctn">
+            <input type="text" id="gameChatFeedInput" placeholder="Enter a message here...">
+          </div>
+        </div>
+        <div class="game-chat-users-ctn">
+          <small>Users <span id="gameChatUserCount"></span></small>
+          <div id="gameChatUsers"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyDEyTP4WRApsqQFw7_I2Ihs_RyqN2lsICs",
+      authDomain: "newavalonline.firebaseapp.com",
+      databaseURL: "https://newavalonline.firebaseio.com",
+      projectId: "newavalonline",
+      storageBucket: "newavalonline.appspot.com",
+      messagingSenderId: "127472640177"
+    };
+    firebase.initializeApp(config);
+
+    // ===================== //
+    // === Avalon Online === //
+    // ===================== //
+
+    // --- QoL --- //
+    function log_info(t) {
+      console.log(`%c${t}`, 'background:#afc;padding:4px;font-weight:600')
+    }
+
+    // -------------------- //
+    // --- 1. User Auth --- //
+    // -------------------- //
+
+    var userData = {
+      uid: null,
+      nickname: null
+    }
+
+    firebase.auth().signInAnonymously().catch(function (error) {
+      console.log(`Error Code ${error.code}: ${error.message}`)
+    });
+
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        userData.uid = user.uid;
+        log_info(`AUTH: User Signed In. (UID:${user.uid})`)
+        document.querySelector('#lobbyPlayerId').innerHTML = user.uid
+      } else {
+        log_info('AUTH: User Signed Out.')
+      }
+    });
+
+    // ------------- //
+    // --- 2. UI --- //
+    // ------------- //
+
+    var screen = 'lobby'
+
+    function joinGame(roomId, nickname) {
+      if (!roomId && !nickname) {
+        alert('Please input a Room Number and a Nickname before continuing!')
+        return
+      }
+
+      try {
+        userData.nickname = nickname
+        loadRoomUI()
+        populateRoomData(roomId, nickname)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
+    function loadRoomUI() {
+      document.querySelector('#lobby').style.display = 'none'
+      document.querySelector('#game').style.display = 'flex'
+      setTimeout(() => {
+        document.querySelector('#loading').style.opacity = '0'
+      }, 1500);
+      setTimeout(() => {
+        document.querySelector('#loading').style.display = 'none'
+      }, 3500);
+      screen = 'game'
+    }
+
+    function updatePlayers(players) {
+      var playersHtml = ''
+      players.forEach(player => {
+        playersHtml += `
+        <div data-uid="${player.uid}" class="game-table-player-ctn player-${player.uid}">
+          <div class="game-table-player">
+            <div class="game-table-player-portrait character-portrait-servant"></div>
+            <div class="game-table-player-name">${player.nickname}</div>
+            <div class="game-table-player-team character-team-good"></div>
+          </div>
+        </div>
+        `
+      })
+      document.querySelector('#playersCtn').innerHTML = playersHtml
+    }
+
+    function updateMessages(messages) {
+      if (!messages) {
+        console.log('LOG: No messages found.')
+        document.querySelector('#gameChatFeed').innerHTML =
+          `<div style="padding: 12px; opacity: .8;">It's empty here... type something in!</div>`
+        return
+      }
+      var messagesHtml = ''
+      messageList = Object.values(messages)
+      console.log(messageList)
+      messageList.forEach(message => {
+        messagesHtml += `
+        <div class="game-chat-feed-message">${message.user}: ${message.text}</div>
+        `
+      })
+      document.querySelector('#gameChatFeed').innerHTML = messagesHtml
+    }
+
+    function updateUsers(users) {
+      if (!users) {
+        console.log('LOG: No users.')
+        return
+      }
+      var usersHtml = ''
+      var userCount = 0
+      users.forEach(user => {
+        userCount++
+        usersHtml += `
+        <div class="game-chat-user">${user.isHost ? '(Host) ' : ''}${user.nickname}</div>
+        `
+      })
+      document.querySelector('#gameChatUserCount').innerHTML = `(${userCount})`
+      document.querySelector('#gameChatUsers').innerHTML = usersHtml
+    }
+    // --------------------- //
+    // --- 3. Room Logic --- //
+    // --------------------- //
+
+    var roomData = null
+
+    function populateRoomData(roomId, nickname) {
+      firebase.database().ref('/rooms/' + roomId).once('value').then(function (snapshot) {
+        var room = snapshot.val()
+        if (!room) {
+          createRoom(roomId, nickname, userData.uid)
+        } else {
+          document.querySelector('#gameMetaRoomId').innerHTML = roomId
+          roomData = room
+          refreshRoom(roomId)
+        }
+      });
+    }
+
+    function createRoom(roomId, nickname, uid) {
+      firebase.database().ref('rooms/' + roomId).set({
+        roomId: roomId,
+        host: uid,
+        players: [{
+          uid: uid,
+          nickname: nickname,
+          isHost: true
+        }]
+      }).then(function () {
+        populateRoomData(roomId, nickname)
+      })
+    }
+
+    function refreshRoom(roomId) {
+      if (!roomData) {
+        alert(`Error: No room data detected for ID ${roomId}`)
+        return
+      } else {
+        var metaRef = firebase.database().ref(`rooms/${roomId}/meta`);
+        metaRef.on('value', function (snapshot) {
+          var metaData = snapshot.val()
+          console.log(metaData)
+        });
+
+        var messagesRef = firebase.database().ref(`rooms/${roomId}/messages`);
+        messagesRef.on('value', function (snapshot) {
+          var messagesData = snapshot.val()
+          console.log(messagesData)
+          updateMessages(roomData.messages)
+        });
+
+        var playersRef = firebase.database().ref(`rooms/${roomId}/players`);
+        playersRef.on('value', function (snapshot) {
+          var playersData = snapshot.val()
+          console.log(playersData)
+          updatePlayers(roomData.players)
+          updateUsers(roomData.players)
+          if (!roomData.players) {
+            console.log('LOG: No players in room.')
+          }
+        });
+      }
+    }
+
+    // === Chat Logic === //
+
+    document.getElementById('gameChatFeedInput').addEventListener('keyup', e => {
+      e.preventDefault()
+      if (e.keyCode === 13) {
+        var chatInputElement = document.getElementById('gameChatFeedInput')
+        sendMessage(chatInputElement.value)
+      }
+    })
+
+    function sendMessage(message) {
+      if (!message) {
+        console.log('LOG: No message input.')
+        return
+      }
+      var roomMessagesRef = firebase.database().ref(`rooms/${roomData.roomId}/messages`);
+      var newMessageRef = roomMessagesRef.push();
+      newMessageRef.set({
+        user: userData.nickname,
+        uid: userData.uid,
+        text: message
+      });
+      document.getElementById('gameChatFeedInput').value = ''
+    }
+  </script>
+</body>
+
+</html>

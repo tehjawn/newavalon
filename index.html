@@ -439,6 +439,7 @@
     }
 
     function updateMessages(messages) {
+      console.log(messages)
       if (!messages) {
         console.log('LOG: No messages found.')
         document.querySelector('#gameChatFeed').innerHTML =
@@ -520,16 +521,16 @@
         messagesRef.on('value', function (snapshot) {
           var messagesData = snapshot.val()
           console.log(messagesData)
-          updateMessages(roomData.messages)
+          updateMessages(messagesData)
         });
 
         var playersRef = firebase.database().ref(`rooms/${roomId}/players`);
         playersRef.on('value', function (snapshot) {
           var playersData = snapshot.val()
           console.log(playersData)
-          updatePlayers(roomData.players)
-          updateUsers(roomData.players)
-          if (!roomData.players) {
+          updatePlayers(playersData)
+          updateUsers(playersData)
+          if (!playersData) {
             console.log('LOG: No players in room.')
           }
         });

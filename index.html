@@ -310,13 +310,18 @@
         <small>Player ID: <span id="lobbyPlayerId"></span></small>
       </p>
       <div class="lobby-form">
-        <span class="lobby-form-label">Enter Room Number: </span>
-        <input tabindex="1" class="lobby-form-input" type="text" id="targetRoomInput" placeholder="Ex: 12345">
+        <span class="lobby-form-label">Enter Room ID:
+          <br>
+          <small>
+            Numbers and letters only!
+          </small>
+        </span>
+        <input tabindex="1" class="lobby-form-input" type="text" id="targetRoomInput" placeholder="Ex: RoomA">
         <br>
         <span class="lobby-form-label">Enter Your Nickname:
           <br>
           <small>
-            Be careful - you can only set this once per room!
+            This is what people will call you.
           </small>
         </span>
         <input tabindex="2" class="lobby-form-input" type="text" id="targetNicknameInput"
@@ -419,7 +424,12 @@
 
     function joinGame(roomId, nickname) {
       if (!roomId || !nickname) {
-        alert('Please input a Room Number and a Nickname before continuing!')
+        alert('Please input a Room ID and a Nickname before continuing!')
+        return
+      }
+
+      if (!roomId.value.match(/^[0-9a-zA-Z]+$/)) {
+        alert('Please input a valid alphanumeric Room ID before continuing!')
         return
       }
 
@@ -454,7 +464,7 @@
               <div class="game-table-player-portrait character-portrait-servant">
                 ${player.uid == userData.uid ? '<div class="character-icon-self">You</div>' : ''}
               </div>
-              <div class="game-table-player-name">${player.isHost ? '(Host) ' : ''}${player.nickname}</div>
+              <div class="game-table-player-name">${player.isHost ? '👑 ' : ''}${player.nickname}</div>
               <div class="game-table-player-team character-team-good"></div>
             </div>
           </div>
@@ -641,4 +651,5 @@
   - Store Rooms a User exists in
   - Confirmation dialogs
   - Custom Detailed Player cards
+  - Update message nicknames when player changes nickname
 -->

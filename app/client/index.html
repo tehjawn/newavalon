@@ -12,7 +12,13 @@
   <div id="socketInfo"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
   <script>
-
+    var socket = io.connect('http://localhost:3000');
+    socket.on('news', function (data) {
+      console.log(data);
+      socket.emit('my other event', {
+        my: 'data'
+      });
+    });
   </script>
 </body>
 
